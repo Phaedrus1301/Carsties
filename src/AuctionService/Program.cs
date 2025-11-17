@@ -1,5 +1,7 @@
+using AuctionService.Consumers;
 using AuctionService.Data;
 using AuctionService.RequestHelpers;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +16,26 @@ builder.Services.AddDbContext<AuctionDbContext>(opt =>
 });
 
 builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddMassTransit(x =>
+{
+    x.AddEntityFrameworkOutbox<AuctionDbContext>(o => 
+    {
+        o.QueryDelay = TimeSpan.FromSeconds(10);
+        o.UsePostgres();
+        o.UseBusOutbox();
+    });
+
+    x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
+    //homework code for update n delete
+    x.AddConsumersFromNamespaceContaining<AuctionUpdatedFaultConsumer>();
+    x.AddConsumersFromNamespaceContaining<AuctionDeletedFaultConsumer>();
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction", false));
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 var app = builder.Build();
 

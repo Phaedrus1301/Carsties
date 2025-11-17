@@ -28,9 +28,9 @@ namespace SearchService.Controllers
 
             query = searchParams.FilterBy switch
             {
-                "finished" => query.Match(x => x.AuctionEnd < DateTime.UtcNow),
-                "endingSoon" => query.Match(x => x.AuctionEnd <DateTime.UtcNow.AddHours(5) && x.AuctionEnd > DateTime.UtcNow),
-                _ => query.Match(x => x.AuctionEnd > DateTime.UtcNow)
+                "finished" => query.Match(x => x.AuctionEnd <= DateTime.UtcNow),
+                "endingSoon" => query.Match(x => x.AuctionEnd <= DateTime.UtcNow.AddHours(5) && x.AuctionEnd >= DateTime.UtcNow),
+                _ => query.Match(x => x.AuctionEnd >= DateTime.UtcNow)
             };
 
             if(!string.IsNullOrEmpty(searchParams.Seller))
@@ -45,8 +45,9 @@ namespace SearchService.Controllers
 
             query.PageNumber(searchParams.PageNumber);
             query.PageSize(searchParams.PageSize);
-
+            Console.WriteLine(query);
             var result = await query.ExecuteAsync();
+            Console.WriteLine(result.Results);
             return Ok(new
             {
                 results = result.Results,
