@@ -27,9 +27,7 @@ builder.Services.AddMassTransit(x =>
     });
 
     x.AddConsumersFromNamespaceContaining<AuctionCreatedFaultConsumer>();
-    //homework code for update n delete
-    x.AddConsumersFromNamespaceContaining<AuctionUpdatedFaultConsumer>();
-    x.AddConsumersFromNamespaceContaining<AuctionDeletedFaultConsumer>();
+
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("auction", false));
 
     x.UsingRabbitMq((context, cfg) =>
