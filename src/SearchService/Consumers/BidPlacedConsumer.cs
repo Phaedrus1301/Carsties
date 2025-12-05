@@ -9,7 +9,7 @@ namespace SearchService.Consumers
     {
         public async Task Consume(ConsumeContext<BidPlaced> context)
         {
-            Console.WriteLine("--> AuctionFinished : Consuming auction finished");
+            Console.WriteLine("--> BidPlaced : Consuming bid placing in Search-SVC");
             var auction = await DB.Find<Item>().OneAsync(context.Message.AuctionId);
 
             if(context.Message.BidStatus.Contains("Accepted") &&

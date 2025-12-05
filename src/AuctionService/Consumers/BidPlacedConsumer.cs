@@ -15,13 +15,13 @@ namespace AuctionService.Consumers
 
         public async Task Consume(ConsumeContext<BidPlaced> context)
         {
-            Console.WriteLine("--> BidPlaced : Consuming big placing");
+            Console.WriteLine("--> BidPlaced : Consuming bid placing in Auction-SVC");
             
-            var auction = await _dbContext.Auctions.FindAsync(context.Message.AuctionId);
+            var auction = await _dbContext.Auctions.FindAsync(Guid.Parse(context.Message.AuctionId));
 
-            if (auction.CurrentHighBid == null || 
-                context.Message.BidStatus.Contains("Accepted") &&
-                context.Message.Amount > auction.CurrentHighBid)
+            if (context.Message.BidStatus.Contains("Accepted") &&
+                context.Message.Amount > auction.CurrentHighBid 
+                || auction.CurrentHighBid == null)
             {
                 auction.CurrentHighBid = context.Message.Amount;
             }
