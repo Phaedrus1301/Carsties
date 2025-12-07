@@ -2,26 +2,31 @@ import type { Metadata } from "next";
 import "./globals.css";
 import NavBar from "./nav/NavBar";
 import ToasterProvider from "./providers/ToasterProvider";
+import SignalRProvider from "./providers/SignalRProvider";
+import { getCurrentUser } from "./actions/authAction";
 export const metadata: Metadata = {
   title: "Carsties app",
   description: "Auction app made to learn .NET microservices and NextJS",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <ToasterProvider />
-        <NavBar />
-        <main className="container mx-auto px-5 pt-10">
-            {children}
-        </main>
-        
-      </body>
-    </html>
-  );
+    const user = await getCurrentUser();
+    return (
+        <html lang="en">
+        <body>
+            <ToasterProvider />
+            <NavBar />
+            <main className="container mx-auto px-5 pt-10">
+                <SignalRProvider user={user}>
+                    {children}
+                </SignalRProvider>
+            </main>
+            
+        </body>
+        </html>
+    );
 }

@@ -24,6 +24,7 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
+app.UseRouting();
 app.MapHub<NotificationHub>("/notifications");
 
 app.Run();
