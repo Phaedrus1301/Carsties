@@ -3,6 +3,9 @@ import withFlowbiteReact from "flowbite-react/plugin/nextjs";
 
 const nextConfig: NextConfig = {
   /* config options here */
+    experimental: {
+        globalNotFound: true,
+    },
     logging: {
         fetches: {
             fullUrl: true
@@ -12,8 +15,8 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {protocol: 'https', hostname: 'cdn.pixabay.com'}
         ]
-    }
-  
+    },
+    output: 'standalone'
 };
 
 export default withFlowbiteReact(nextConfig);
