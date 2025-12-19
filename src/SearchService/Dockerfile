@@ -1,16 +1,31 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+EXPOSE 80
 WORKDIR /app
 
-COPY Carsties.sln ./
-COPY src/SearchService/SearchService.csproj ./src/SearchService/
+# Copy all .csproj files and restore as distinct layers. User the same COPY Command for every dockerfile in 
+# project to take advantage of docker caching
+COPY Carsties.sln Carsties.sln
+COPY src/AuctionService/AuctionService.csproj src/AuctionService/AuctionService.csproj
+COPY src/SearchService/SearchService.csproj src/SearchService/SearchService.csproj
+COPY src/GatewayService/GatewayService.csproj src/GatewayService/GatewayService.csproj
 COPY src/Contracts/Contracts.csproj ./src/Contracts/
+COPY src/IdentityService/IdentityService.csproj src/IdentityService/IdentityService.csproj
+COPY src/BiddingService/BiddingService.csproj src/BiddingService/BiddingService.csproj
+COPY src/NotificationService/NotificationService.csproj src/NotificationService/NotificationService.csproj
+COPY tests/AuctionService.UnitTests/AuctionService.UnitTests.csproj tests/AuctionService.UnitTests/AuctionService.UnitTests.csproj
+COPY tests/AuctionService.IntegrationTests/AuctionService.IntegrationTests.csproj tests/AuctionService.IntegrationTests/AuctionService.IntegrationTests.csproj
 
-RUN dotnet restore ./src/SearchService/SearchService.csproj
-COPY . .
-RUN dotnet publish ./src/SearchService/SearchService.csproj -c Release -o /app/publish
+# Restore package deps
+RUN dotnet restore Carsties.sln
 
+# Copy the app folders over
+COPY src/SearchService src/SearchService
+COPY src/Contracts src/Contracts
+WORKDIR /app/src/SearchService
+RUN dotnet publish -c Release -o /app/src/out
+
+# Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
-EXPOSE 80
-COPY --from=build /app/publish .
+COPY --from=build /app/src/out .
 ENTRYPOINT [ "dotnet", "SearchService.dll" ]
