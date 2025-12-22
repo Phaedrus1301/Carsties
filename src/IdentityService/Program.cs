@@ -1,8 +1,10 @@
-using System.Globalization;
-using System.Text;
 using Duende.IdentityServer.Licensing;
 using IdentityService;
+using Npgsql;
+using Polly;
 using Serilog;
+using System.Globalization;
+using System.Text;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
@@ -21,7 +23,8 @@ try
 
     // this seeding is only for the template to bootstrap the DB and users.
     // in production you will likely want a different approach.
-    SeedData.EnsureSeedData(app);
+    var retryPolicy = Policy.Handle<NpgsqlException>().WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(5));
+    retryPolicy.ExecuteAndCapture(() => SeedData.EnsureSeedData(app));
 
     if (app.Environment.IsDevelopment())
     {
